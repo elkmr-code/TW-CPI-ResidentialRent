@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taiwan Consumer Price Index - Residential Rent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .controls h3 {
+            margin-bottom: 20px;
+            color: #667eea;
+            font-size: 1.4em;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .search-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .data-display {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .status.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .status.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #666;
+        }
+
+        .chart-container {
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>台灣消費者物價指數</h1>
+            <p>Taiwan Consumer Price Index - Residential Rent</p>
+        </div>
+
+        <div class="controls">
+            <h3>資料輸入 Data Input</h3>
+            <form id="dataForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="year">年份 Year:</label>
+                        <input type="number" id="year" name="year" min="2000" max="2030" value="2024" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="month">月份 Month:</label>
+                        <select id="month" name="month" required>
+                            <option value="">選擇月份</option>
+                            <option value="1">1月</option>
+                            <option value="2">2月</option>
+                            <option value="3">3月</option>
+                            <option value="4">4月</option>
+                            <option value="5">5月</option>
+                            <option value="6">6月</option>
+                            <option value="7">7月</option>
+                            <option value="8">8月</option>
+                            <option value="9">9月</option>
+                            <option value="10">10月</option>
+                            <option value="11">11月</option>
+                            <option value="12">12月</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productName">商品名稱 Product Name:</label>
+                        <input type="text" id="productName" name="productName" value="Residential Rent" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productPrice">商品價格 Product Price:</label>
+                        <input type="number" id="productPrice" name="productPrice" step="0.01" placeholder="15000" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cpiValue">CPI 指數 CPI Value:</label>
+                        <input type="number" id="cpiValue" name="cpiValue" step="0.1" placeholder="105.5" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="rentIndex">住宅租金指數 Residential Rent Index:</label>
+                        <input type="number" id="rentIndex" name="rentIndex" step="0.1" placeholder="108.2" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn">新增資料 Add Data</button>
+                <button type="button" class="btn btn-secondary" onclick="syncWebData()">同步網路資料 Sync Web Data</button>
+            </form>
+        </div>
+
+        <div class="search-section">
+            <h3>資料查詢 Data Query</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="searchYear">搜尋年份 Search Year:</label>
+                    <input type="number" id="searchYear" name="searchYear" placeholder="輸入年份或留空查看全部">
+                </div>
+                <div class="form-group">
+                    <label for="searchProduct">搜尋商品 Search Product:</label>
+                    <input type="text" id="searchProduct" name="searchProduct" placeholder="輸入商品名稱">
+                </div>
+            </div>
+            <button type="button" class="btn" onclick="searchData()">搜尋 Search</button>
+            <button type="button" class="btn" onclick="loadAllData()">顯示全部資料 Show All Data</button>
+        </div>
+
+        <div class="status" id="status"></div>
+
+        <div class="data-display">
+            <h3>資料顯示 Data Display</h3>
+            <div class="table-container">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>年份 Year</th>
+                            <th>月份 Month</th>
+                            <th>商品名稱 Product</th>
+                            <th>商品價格 Price</th>
+                            <th>CPI 指數</th>
+                            <th>住宅租金指數</th>
+                            <th>建立時間 Created</th>
+                            <th>操作 Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody">
+                        <tr>
+                            <td colspan="9" class="loading">載入中... Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API 基礎 URL (這裡假設後端 API 運行在 3000 port)
+        const API_BASE = 'http://localhost:3000/api';
+
+        // 頁面載入時自動載入資料
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAllData();
+        });
+
+        // 表單提交處理
+        document.getElementById('dataForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = {
+                year: parseInt(formData.get('year')),
+                month: parseInt(formData.get('month')),
+                product_name: formData.get('productName'),
+                product_price: parseFloat(formData.get('productPrice')),
+                cpi_value: parseFloat(formData.get('cpiValue')),
+                residential_rent_index: parseFloat(formData.get('rentIndex'))
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/cpi`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showStatus('資料新增成功！', 'success');
+                    this.reset();
+                    loadAllData();
+                } else {
+                    const error = await response.text();
+                    showStatus(`新增失敗: ${error}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`連接錯誤: ${error.message}`, 'error');
+            }
+        });
+
+        // 載入全部資料
+        async function loadAllData() {
+            try {
+                const response = await fetch(`${API_BASE}/cpi`);
+                if (response.ok) {
+                    const data = await response.json();
+                    displayData(data);
+                } else {
+                    showStatus('載入資料失敗', 'error');
+                }
+            } catch (error) {
+                showStatus(`連接錯誤: ${error.message}`, 'error');
+            }
+        }
+
+        // 搜尋資料
+        async function searchData() {
+            const year = document.getElementById('searchYear').value;
+            const product = document.getElementById('searchProduct').value;
+
+            let url = `${API_BASE}/cpi/search?`;
+            const params = new URLSearchParams();
+
+            if (year) params.append('year', year);
+            if (product) params.append('product', product);
+
+            try {
+                const response = await fetch(url + params.toString());
+                if (response.ok) {
+                    const data = await response.json();
+                    displayData(data);
+                    showStatus(`找到 ${data.length} 筆資料`, 'success');
+                } else {
+                    showStatus('搜尋失敗', 'error');
+                }
+            } catch (error) {
+                showStatus(`搜尋錯誤: ${error.message}`, 'error');
+            }
+        }
+
+        // 同步網路資料
+        async function syncWebData() {
+            showStatus('正在同步網路資料，請稍候...', 'success');
+
+            try {
+                const response = await fetch(`${API_BASE}/sync-web-data`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showStatus(`同步完成！新增了 ${result.count} 筆資料`, 'success');
+                    loadAllData();
+                } else {
+                    const error = await response.text();
+                    showStatus(`同步失敗: ${error}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`同步錯誤: ${error.message}`, 'error');
+            }
+        }
+
+        // 顯示資料在表格中
+        function displayData(data) {
+            const tbody = document.getElementById('dataTableBody');
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="loading">沒有找到資料</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(item => `
+                <tr>
+                    <td>${item.id}</td>
+                    <td>${item.year}</td>
+                    <td>${item.month || '-'}</td>
+                    <td>${item.product_name}</td>
+                    <td>${item.product_price ? item.product_price.toFixed(2) : '-'}</td>
+                    <td>${item.cpi_value ? item.cpi_value.toFixed(1) : '-'}</td>
+                    <td>${item.residential_rent_index ? item.residential_rent_index.toFixed(1) : '-'}</td>
+                    <td>${new Date(item.created_at).toLocaleDateString('zh-TW')}</td>
+                    <td>
+                        <button class="btn" style="padding: 5px 10px; font-size: 12px;" onclick="deleteRecord(${item.id})">刪除</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 刪除記錄
+        async function deleteRecord(id) {
+            if (!confirm('確定要刪除這筆資料嗎？')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/cpi/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showStatus('資料刪除成功！', 'success');
+                    loadAllData();
+                } else {
+                    showStatus('刪除失敗', 'error');
+                }
+            } catch (error) {
+                showStatus(`刪除錯誤: ${error.message}`, 'error');
+            }
+        }
+
+        // 顯示狀態訊息
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
+

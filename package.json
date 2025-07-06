@@ -3,13 +3,26 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "setup-db": "node db.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "taiwan",
+    "cpi",
+    "residential",
+    "rent",
+    "macromicro"
+  ],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Taiwan Consumer Price Index - Residential Rent Tracker",
   "dependencies": {
+    "axios": "^1.10.0",
+    "cheerio": "^1.1.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "sqlite3": "^5.1.7"
   }
 }
